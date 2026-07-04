@@ -1,11 +1,5 @@
-"""
-Background worker: blocks on a Redis list (BRPOP), pulls task IDs pushed by
-the Node backend, loads the task from MongoDB, runs the requested text
-operation, and writes status/result/logs back to MongoDB.
-
-Multiple replicas of this process can run concurrently (see k8s HPA) because
-BRPOP is atomic across consumers — no two workers will get the same task id.
-"""
+from dotenv import load_dotenv
+load_dotenv()
 
 import os
 import sys
@@ -24,13 +18,32 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [worker] %(levelname)s %(message)s",
 )
+
 log = logging.getLogger("worker")
 
-REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
-TASK_QUEUE_KEY = os.environ.get("TASK_QUEUE_KEY", "ai_task_queue")
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/ai_task_platform")
-BRPOP_TIMEOUT_SECONDS = int(os.environ.get("BRPOP_TIMEOUT_SECONDS", "5"))
-MAX_RETRIES = int(os.environ.get("MAX_RETRIES", "3"))
+# ---------------- Environment Variables ----------------
+
+REDIS_URL = os.getenv("REDIS_URL")
+TASK_QUEUE_KEY = os.getenv("TASK_QUEUE_KEY", "ai_task_queue")
+MONGO_URI = os.getenv(
+    "MONGO_URI",
+    "mongodb+srv://ankur143514_db_user:Wm589kFhO8qAlnpi@taskhandler.hdefi37.mongodb.net/"
+)
+
+BRPOP_TIMEOUT_SECONDS = int(
+    os.getenv("BRPOP_TIMEOUT_SECONDS", "5")
+)
+
+MAX_RETRIES = int(
+    os.getenv("MAX_RETRIES", "3")
+)
+
+if not REDIS_URL:
+    log.error("REDIS_URL environment variable is missing.")
+    sys.exit(1)
+
+log.info("Using Redis URL: %s", REDIS_URL.split("@")[-1])
+log.info("Using Mongo URI: %s", MONGO_URI)
 
 running = True
 
@@ -48,16 +61,33 @@ signal.signal(signal.SIGINT, handle_shutdown)
 def connect_redis():
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            client = redis.from_url(REDIS_URL, decode_responses=True)
-            client.ping()
-            log.info("Connected to Redis")
-            return client
-        except redis.exceptions.RedisError as exc:
-            log.warning("Redis connection attempt %s/%s failed: %s", attempt, MAX_RETRIES, exc)
-            time.sleep(2 ** attempt)
-    log.error("Could not connect to Redis after %s attempts, exiting", MAX_RETRIES)
-    sys.exit(1)
+            client = redis.from_url(
+                REDIS_URL,
+                decode_responses=True,
+                socket_connect_timeout=10,
+                socket_timeout=10,
+            )
 
+            client.ping()
+
+            log.info("Connected to Redis successfully")
+            return client
+
+        except Exception as exc:
+            log.warning(
+                "Redis connection attempt %s/%s failed: %s",
+                attempt,
+                MAX_RETRIES,
+                exc,
+            )
+
+            time.sleep(2 ** attempt)
+
+    log.error(
+        "Could not connect to Redis after %s attempts.",
+        MAX_RETRIES,
+    )
+    sys.exit(1)
 
 def connect_mongo():
     for attempt in range(1, MAX_RETRIES + 1):
@@ -158,3 +188,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+ 

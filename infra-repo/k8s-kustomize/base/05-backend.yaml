@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: ai-task-platform
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: backend }
+  template:
+    metadata:
+      labels: { app: backend }
+    spec:
+      containers:
+        - name: backend
+          image: YOUR_DOCKERHUB_USERNAME/ai-task-backend:latest
+          ports: [{ containerPort: 5000 }]
+          envFrom:
+            - configMapRef: { name: ai-task-platform-config }
+          env:
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef: { name: ai-task-platform-secrets, key: JWT_SECRET }
+          resources:
+            requests: { cpu: "150m", memory: "128Mi" }
+            limits: { cpu: "500m", memory: "256Mi" }
+          readinessProbe:
+            httpGet: { path: /readyz, port: 5000 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: 5000 }
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: ai-task-platform
+spec:
+  selector: { app: backend }
+  ports: [{ port: 5000, targetPort: 5000 }]

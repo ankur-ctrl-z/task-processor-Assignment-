@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ai-task-platform-staging
+nameSuffix: ""
+resources:
+  - ../../base
+patchesStrategicMerge:
+  - patch-replicas.yaml
+  - patch-ingress.yaml
+images:
+  - name: YOUR_DOCKERHUB_USERNAME/ai-task-backend
+    newTag: staging
+  - name: YOUR_DOCKERHUB_USERNAME/ai-task-worker
+    newTag: staging
+  - name: YOUR_DOCKERHUB_USERNAME/ai-task-frontend
+    newTag: staging

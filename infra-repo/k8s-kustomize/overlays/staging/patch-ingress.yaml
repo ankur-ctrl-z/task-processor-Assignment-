@@ -1,0 +1,10 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ai-task-platform-ingress
+spec:
+  tls:
+    - hosts: ["staging.ai-tasks.example.com"]
+      secretName: ai-task-platform-tls-staging
+  rules:
+    - host: staging.ai-tasks.example.com

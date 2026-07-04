@@ -1,0 +1,72 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+  background: #f5f6f8;
+  color: #1a1a1a;
+}
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+.auth-form {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  width: 320px;
+}
+.auth-form input, .auth-form button {
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+.auth-form button {
+  background: #0077cc;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+.error { color: #c0392b; }
+.dashboard { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+.dashboard header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.task-form {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+.task-form input, .task-form textarea, .task-form select, .task-form button {
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+.task-form button {
+  background: #0077cc;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+.task-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.task-table th, .task-table td {
+  padding: 0.7rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}

@@ -1,0 +1,66 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      PORT: 5000
+      MONGO_URI: mongodb://mongo:27017/ai_task_platform
+      REDIS_URL: redis://redis:6379
+      TASK_QUEUE_KEY: ai_task_queue
+      JWT_SECRET: local-dev-secret-change-me
+      JWT_EXPIRES_IN: 7d
+      CORS_ORIGIN: http://localhost:3000
+    ports:
+      - "5000:5000"
+
+  worker:
+    build:
+      context: ./worker
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      MONGO_URI: mongodb://mongo:27017/ai_task_platform
+      REDIS_URL: redis://redis:6379
+      TASK_QUEUE_KEY: ai_task_queue
+    deploy:
+      replicas: 2
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:5000/api
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:8080"
+
+volumes:
+  mongo_data:
+  redis_data:

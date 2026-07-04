@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: ai-task-platform
+spec:
+  replicas: 3
+  selector:
+    matchLabels: { app: worker }
+  template:
+    metadata:
+      labels: { app: worker }
+    spec:
+      containers:
+        - name: worker
+          image: YOUR_DOCKERHUB_USERNAME/ai-task-worker:latest
+          envFrom:
+            - configMapRef: { name: ai-task-platform-config }
+          resources:
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits: { cpu: "500m", memory: "256Mi" }
+          # No HTTP server in this process, so probes use a lightweight
+          # process check instead of an HTTP endpoint.
+          livenessProbe:
+            exec: { command: ["pgrep", "-f", "worker.py"] }
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+---
+# Scales worker replicas on CPU load. In production this should be swapped
+# for KEDA's redis-list scaler, which scales on queue depth directly rather
+# than CPU (queue depth is the real signal for a queue consumer) — see
+# docs/architecture.md "Worker scaling strategy".
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: worker-hpa
+  namespace: ai-task-platform
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: worker
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "Backend API for AI Task Processing Platform",
   "main": "src/server.js",
-{
+
   "scripts": {
     "start": "node src/server.js"
   }
-},
+
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

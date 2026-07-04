@@ -1,6 +1,6 @@
 # Architecture Document — AI Task Processing Platform
 
-## 1. Overall System Architecture
+## 1. Overall System Architecture 
 
 The platform is a MERN application with an async Python worker tier, split into
 five deployable units: **frontend** (React SPA served by Nginx), **backend**

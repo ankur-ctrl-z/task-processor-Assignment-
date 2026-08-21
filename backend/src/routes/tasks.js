@@ -5,7 +5,7 @@ const { pushTask } = require('../config/redis');
 const requireAuth = require('../middleware/auth');
 
 const router = express.Router();
-router.use(requireAuth);
+router.use(requireAuth); 
 
 // Create a task (status = PENDING, not yet queued).
 router.post('/', async (req, res) => {

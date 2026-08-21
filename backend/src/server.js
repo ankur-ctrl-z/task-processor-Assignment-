@@ -51,7 +51,7 @@ async function start() {
 
 start().catch((err) => {
   console.error('[server] Failed to start:', err);
-  process.exit(1);
+  process.exit(1); 
 });
 
 module.exports = app;

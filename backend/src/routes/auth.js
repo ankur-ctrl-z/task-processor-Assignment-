@@ -8,7 +8,7 @@ const router = express.Router();
 // Tighter limit on auth endpoints specifically — this is the brute-force
 // attack surface, not the general API.
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: 15 * 60 * 1000, 
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,

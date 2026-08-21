@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const helmet = require('helmet');
-const cors = require('cors');
+// const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 const connectDB = require('./config/db');
@@ -13,7 +13,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(helmet());
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
+// app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json({ limit: '1mb' }));
 
 // General API rate limit (auth routes have their own tighter limit).

@@ -34,8 +34,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Execute a task: push its id onto the Redis queue. The Python worker
-// consumes it, flips status to RUNNING, then SUCCESS/FAILED.
 router.post('/:id/run', async (req, res) => {
   try {
     const task = await Task.findOne({ _id: req.params.id, user: req.userId });
